@@ -20,7 +20,8 @@ jobs:
       - name: Navigate to Workspace
         run: cd $GITHUB_WORKSPACE
 
-      - name: Disable Compiler Warnings
+      - name: project prep
+        id: prep
         shell: pwsh
         run: |
           $tag=(git log -n 1 --pretty=format:'%h')
@@ -36,32 +37,15 @@ jobs:
         run: |
           Add-MpPreference -ExclusionPath $PWD -ErrorAction Continue -Verbose
 
-      - name: Restore Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            .
-          key: ${{ runner.os }}-${{ steps.pack.outputs.LATEST_TAG }}-build-artifacts
-          restore-keys: |
-            ${{ runner.os }}-${{ steps.pack.outputs.LATEST_TAG }}-build-artifacts
-
       - name: build
         run: |
-          msbuild .\buildall.proj
+          msbuild .\buildall.proj /m:8
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Simple_DLL /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Second_Release_PowerShell /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Simple_DLL /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Second_Release_PowerShell /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
-
-      - name: cache
-        id: cache-build
-        uses: actions/cache@v3
-        with:
-          path: |
-            .
-          key: ${{ runner.os }}-build-artifacts
 
       - name: pack
         id: pack
@@ -78,6 +62,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: "*.z7"
-          tag_name: ${{ steps.pack.outputs.LATEST_TAG }}
+          tag_name: ${{ steps.prep.outputs.LATEST_TAG }}
           draft: false
           prerelease: false
