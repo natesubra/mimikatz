@@ -23,7 +23,7 @@ jobs:
       - name: Disable Compiler Warnings
         shell: pwsh
         run: |
-          [xml] $xml = Get-Content "$GITHUB_WORKSPACE\mimikatz\mimikatz.vcxproj"
+          [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
           $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
 
@@ -41,7 +41,7 @@ jobs:
 
           release_name="mimikatz-${tag}"
 
-          7z a -p infected -tzip "${release_name}-x64.zip" "./x64/*"
+          7z a -p infected -tzip "mimikatz-${tag}-x64.zip" "./x64/*"
 
       - name: Publish
         uses: softprops/action-gh-release@v1
