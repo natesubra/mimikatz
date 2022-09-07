@@ -23,6 +23,8 @@ jobs:
       - name: Disable Compiler Warnings
         shell: pwsh
         run: |
+          $tag=(git log -n 1 --pretty=format:'%h')
+          echo "::set-output name=LATEST_TAG::${tag}"
           [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
           $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
@@ -32,17 +34,33 @@ jobs:
         run: |
           Add-MpPreference -ExclusionPath $PWD -ErrorAction Continue -Verbose
 
+      - name: Restore Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .
+          key: ${{ runner.os }}-${{ steps.pack.outputs.LATEST_TAG }}-build-artifacts
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.pack.outputs.LATEST_TAG }}-build-artifacts
+
       - name: build
         run: |
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+
+      - name: cache
+        id: cache-build
+        uses: actions/cache@v3
+        with:
+          path: |
+            .
+          key: ${{ runner.os }}-build-artifacts
 
       - name: pack
         id: pack
         shell: pwsh
         run: |
           $tag=(git log -n 1 --pretty=format:'%h')
-          echo "::set-output name=LATEST_TAG::${tag}"
           $RELEASE_NAME="mimikatz-${tag}"
           7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x64.7z" "$PWD\x64\*"
           7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x86.7z" "$PWD\Win32\*"
@@ -52,7 +70,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: "*.zip"
+          files: "*.z7"
           tag_name: ${{ steps.pack.outputs.LATEST_TAG }}
           draft: false
           prerelease: false
