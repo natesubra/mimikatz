@@ -27,6 +27,12 @@ jobs:
           $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
 
+      - name: Defender Exclusions
+        shell: pwsh
+        run: |
+          Add-MpPreference -ExclusionPath $PWD -ErrorAction Continue -Verbose
+          Set-MpPreference -DisableRealtimeMonitoring -DisableScriptScanning -ErrorAction Continue -Verbose
+
       - name: build
         run: |
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
@@ -38,10 +44,9 @@ jobs:
         run: |
           tag="$(git log -n 1 --pretty=format:"%h")"
           echo "::set-output name=LATEST_TAG::${tag}"
-
           release_name="mimikatz-${tag}"
-
-          7z a -p infected -tzip "mimikatz-${tag}-x64.zip" "./x64/*"
+          7z -p infected a -t zip "${release_name}-x64.zip" "./x64/*"
+          7z -p infected a -t zip "${release_name}-x86.zip" "./Win32/*"
 
       - name: Publish
         uses: softprops/action-gh-release@v1
