@@ -24,7 +24,7 @@ jobs:
         shell: powershell
         run: |
           [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
-          $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError=$false
+          $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError=false
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
