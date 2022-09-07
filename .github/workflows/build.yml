@@ -28,6 +28,8 @@ jobs:
           [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
           $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
+          [xml] $buildxml = '<?xml version="1.0" encoding="utf-8"?><Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"><Target Name="Build"><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Release;Platform=Win32;WindowsTargetPlatformVersion=10.0;PlatformToolset=v143" /><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Release;Platform=x64" /><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Simple_DLL;Platform=Win32;WindowsTargetPlatformVersion=10.0;PlatformToolset=v143" /><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Simple_DLL;Platform=x64" /><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Second_Release_PowerShell;Platform=Win32;WindowsTargetPlatformVersion=10.0;PlatformToolset=v143" /><MSBuild Projects="mimikatz.sln" Targets="mimikatz" Properties="Configuration=Second_Release_PowerShell;Platform=x64" /></Target></Project>'
+          $buildxml.Save("$PWD\buildall.proj")
 
       - name: Defender Exclusions
         shell: pwsh
@@ -45,8 +47,13 @@ jobs:
 
       - name: build
         run: |
-          msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
-          msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          msbuild .\buildall.proj
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Simple_DLL /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Second_Release_PowerShell /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Simple_DLL /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Second_Release_PowerShell /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
 
       - name: cache
         id: cache-build
