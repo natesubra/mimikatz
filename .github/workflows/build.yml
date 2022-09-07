@@ -43,15 +43,18 @@ jobs:
         run: |
           $tag=(git log -n 1 --pretty=format:'%h')
           $RELEASE_NAME="mimikatz-${tag}"
-          7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x64.7z" "$PWD\x64\*"
-          7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x86.7z" "$PWD\Win32\*"
+          7z a -y -mx9 -mhe=on -p"${tag}" "${PWD}\${RELEASE_NAME}-x64.7z" "$PWD\x64\*"
+          7z a -y -mx9 -mhe=on -p"${tag}" "${PWD}\${RELEASE_NAME}-x86.7z" "$PWD\Win32\*"
 
       - name: Publish
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: "*.z7"
+          body: |
+            Generated from commit: ${{ steps.prep.outputs.LATEST_TAG }}
+          files: |
+            *.7z
           tag_name: ${{ steps.prep.outputs.LATEST_TAG }}
           draft: false
           prerelease: false
