@@ -31,7 +31,6 @@ jobs:
         shell: pwsh
         run: |
           Add-MpPreference -ExclusionPath $PWD -ErrorAction Continue -Verbose
-          Set-MpPreference -DisableRealtimeMonitoring -DisableScriptScanning -ErrorAction Continue -Verbose
 
       - name: build
         run: |
