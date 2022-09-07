@@ -39,7 +39,7 @@ jobs:
 
       - name: build
         run: |
-          msbuild .\buildall.proj /m:8
+          msbuild .\buildall.proj /m
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Simple_DLL /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           # msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Second_Release_PowerShell /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
