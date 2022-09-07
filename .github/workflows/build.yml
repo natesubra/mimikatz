@@ -20,12 +20,15 @@ jobs:
       - name: Navigate to Workspace
         run: cd $GITHUB_WORKSPACE
 
-      - name: build
-        shell: powershell
+      - name: Disable Compiler Warnings
+        shell: pwsh
         run: |
-          [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
-          $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError=false
+          [xml] $xml = Get-Content "$GITHUB_WORKSPACE\mimikatz\mimikatz.vcxproj"
+          $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
           $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
+
+      - name: build
+        run: |
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
           msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
 
