@@ -24,6 +24,7 @@ jobs:
         id: prep
         shell: pwsh
         run: |
+          git remote add upstream https://github.com/gentilkiwi/mimikatz
           git fetch upstream/master
           git merge upstream/master
           $tag=(git log -n 1 upstream/master  --pretty=format:'%h')
