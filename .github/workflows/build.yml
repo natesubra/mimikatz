@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Navigate to Workspace
+        run: cd $GITHUB_WORKSPACE
+
+      - name: build
+        shell: powershell
+        run: |
+          [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
+          $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError=$false
+          $xml.Save("$PWD\mimikatz\mimikatz.vcxproj")
+          msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=Win32 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+          msbuild.exe .\mimikatz.sln /nologo /target:mimikatz /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /m:4 /verbosity:minimal
+
+      - name: pack
+        id: pack
+        shell: bash
+        run: |
+          tag="$(git log -n 1 --pretty=format:"%h")"
+          echo "::set-output name=LATEST_TAG::${tag}"
+
+          release_name="mimikatz-${tag}"
+
+          7z a -p infected -tzip "${release_name}-x64.zip" "./x64/*"
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: "*.zip"
+          tag_name: ${{ steps.pack.outputs.LATEST_TAG }}
+          draft: false
+          prerelease: false
