@@ -39,13 +39,13 @@ jobs:
 
       - name: pack
         id: pack
-        shell: bash
+        shell: pwsh
         run: |
-          tag="$(git log -n 1 --pretty=format:"%h")"
+          $tag=(git log -n 1 --pretty=format:'%h')
           echo "::set-output name=LATEST_TAG::${tag}"
-          release_name="mimikatz-${tag}"
-          7z -p infected a -t zip "${release_name}-x64.zip" "./x64/*"
-          7z -p infected a -t zip "${release_name}-x86.zip" "./Win32/*"
+          $RELEASE_NAME="mimikatz-${tag}"
+          7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x64.7z" "$PWD\x64\*"
+          7z a -y -mx9 -mhe=on -p"${tag}" "${RELEASE_NAME}-x86.7z" "$PWD\Win32\*"
 
       - name: Publish
         uses: softprops/action-gh-release@v1
