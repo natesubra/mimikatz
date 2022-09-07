@@ -24,7 +24,9 @@ jobs:
         id: prep
         shell: pwsh
         run: |
-          $tag=(git log -n 1 --pretty=format:'%h')
+          git fetch upstream/master
+          git merge upstream/master
+          $tag=(git log -n 1 upstream/master  --pretty=format:'%h')
           echo "::set-output name=LATEST_TAG::${tag}"
           [xml] $xml = Get-Content "$PWD\mimikatz\mimikatz.vcxproj"
           $xml.Project.ItemDefinitionGroup.ClCompile.TreatWarningAsError="false"
